@@ -38,7 +38,7 @@ def q_compatible_run(env, model, threshold):
     while True:
         # env.render()
         q_values = model.policy.q_net.forward(model.policy.obs_to_tensor(observation)[0])
-        q_values = q_values.detach().numpy()[0]
+        q_values = q_values.detach().cpu().numpy()[0]
         values.append(q_values)
         possible_actions = np.where(q_values + reward_sum > threshold)[0]
         if len(possible_actions) == 0:
