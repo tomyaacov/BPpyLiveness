@@ -142,7 +142,7 @@ experiments = [
 from hot_cold import init_bprogram, params
 
 all_results = {}
-for e in experiments[:2]:
+for e in experiments:
     print(e)
     all_results[e["name"]] = {}
     # Create log dir
