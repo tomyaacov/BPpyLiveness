@@ -146,9 +146,9 @@ for e in experiments:
     print(e)
     all_results[e["name"]] = {}
     # Create log dir
-    log_dir = "output/" + e["name"] + "/"
-    os.makedirs(log_dir, exist_ok=True)
     for i in range(len(e["n"])):
+        log_dir = "output/" + e["name"] + "/" + str(e["n"][i]) + "/"
+        os.makedirs(log_dir, exist_ok=True)
         params["n"] = e["n"][i]
         env = gym_env_generator(e["state_mode"], e["reward_mode"])
         env = Monitor(env, log_dir)
@@ -160,9 +160,11 @@ for e in experiments:
         #             verbose=1)
         model = DQN("MlpPolicy", env, verbose=0)
         model.learn(total_timesteps=e["total_timesteps"][i])
-        # model.save(log_dir + e["name"])
-        # del model # remove to demonstrate saving and loading
-        # model = DQN.load(log_dir + e["name"])
+        model.exploration_rate = 0
+        model.action_space.bprogram = None
+        model.save(log_dir + e["name"])
+        del model  # remove to demonstrate saving and loading
+        model = DQN.load(log_dir + e["name"])
         all_results[e["name"]][e["n"][i]] = evaluate_model(model, e["state_mode"], e["reward_mode"], e["n"])
         env.close()
 

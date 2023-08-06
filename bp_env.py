@@ -147,3 +147,8 @@ class BPEnv(gym.Env):
             return random.choice(possible_keys)
         else:
             return action
+
+    def close(self):
+        super().close()
+        self.bprogram = None
+        self.action_space.bprogram = None
