@@ -96,43 +96,43 @@ def evaluate_model(model, state_mode, reward_mode, n):
 experiments = [
     {
         "name": "a-r",
-        "n": [3, 6, 9, 12, 15],
-        "total_timesteps": [10**5, 4*(10**5), 8*(10**5), 12*(10**5), 16*(10**5)],
+        "n": [18, 21],
+        "total_timesteps": [20*(10**5), 24*(10**5)],
         "state_mode": "a",
         "reward_mode": "r"
     },
 {
         "name": "r-r",
-        "n": [3, 6, 9, 12, 15],
-        "total_timesteps": [10**5, 4*(10**5), 8*(10**5), 12*(10**5), 16*(10**5)],
+        "n": [18, 21],
+        "total_timesteps": [20*(10**5), 24*(10**5)],
         "state_mode": "r",
         "reward_mode": "r"
     },
 {
         "name": "ar-r",
-        "n": [3, 6, 9, 12, 15],
-        "total_timesteps": [10**5, 4*(10**5), 8*(10**5), 12*(10**5), 16*(10**5)],
+        "n": [18, 21],
+        "total_timesteps": [20*(10**5), 24*(10**5)],
         "state_mode": "ar",
         "reward_mode": "r"
     },
 {
         "name": "a-a",
-        "n": [3, 6, 9, 12, 15],
-        "total_timesteps": [10**5, 4*(10**5), 8*(10**5), 12*(10**5), 16*(10**5)],
+        "n": [18, 21],
+        "total_timesteps": [20*(10**5), 24*(10**5)],
         "state_mode": "a",
         "reward_mode": "a"
     },
 {
         "name": "r-a",
-        "n": [3, 6, 9, 12, 15],
-        "total_timesteps": [10**5, 4*(10**5), 8*(10**5), 12*(10**5), 16*(10**5)],
+        "n": [18, 21],
+        "total_timesteps": [20*(10**5), 24*(10**5)],
         "state_mode": "r",
         "reward_mode": "a"
     },
 {
         "name": "ar-a",
-        "n": [3, 6, 9, 12, 15],
-        "total_timesteps": [10**5, 4*(10**5), 8*(10**5), 12*(10**5), 16*(10**5)],
+        "n": [18, 21],
+        "total_timesteps": [20*(10**5), 24*(10**5)],
         "state_mode": "ar",
         "reward_mode": "a"
     },
@@ -160,6 +160,7 @@ for e in experiments:
         #             verbose=1)
         model = DQN("MlpPolicy", env, verbose=0)
         model.learn(total_timesteps=e["total_timesteps"][i])
+        print(model.exploration_rate)
         model.exploration_rate = 0
         model.action_space.bprogram = None
         model.save(log_dir + e["name"])
