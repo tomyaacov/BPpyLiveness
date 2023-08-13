@@ -3,18 +3,19 @@ from bp_action_space import BPActionSpace
 from hot_cold import init_bprogram, params
 import gym
 
-def gym_env_generator(state_mode, reward_mode, n):
+def gym_env_generator(state_mode, reward_mode, n, m):
     mapper = {
-        0: "H",
-        1: "C"
+        0: "H"
     }
+    for i in range(m):
+        mapper[i+1] = "C" + str(i)
     env = BPEnv()
     env.bprogram_generator = init_bprogram
     env.action_space = BPActionSpace(mapper)
     env.action_mapper = mapper
     env.state_mode = state_mode
     env.reward_mode = reward_mode
-    dim = 4
+    dim = 3 + m  # number of bthreads + 1
     if state_mode == "r":
         dim -= 1
     if state_mode == "ar":
@@ -28,7 +29,8 @@ def gym_env_generator(state_mode, reward_mode, n):
 if __name__ == '__main__':
     params["n"] = 5
     params["k"] = 2
-    env = gym_env_generator("a", "r", params["n"])
+    params["m"] = 1
+    env = gym_env_generator("a", "r", params["n"], params["m"])
     state = env.reset()
     print(state)
     done = False

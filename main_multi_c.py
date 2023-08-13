@@ -103,58 +103,24 @@ def evaluate_model(model, state_mode, reward_mode, n, m):
 experiments = [
     {
         "name": "a-r",
-        "n": [10, 20], 
-        "k": [3, 6],
-        "m": [1],
-        "total_timesteps": [2*(10**6), 4*(10**6)],
+        "n": [10, 20, 30],
+        "k": [1],
+        "m": [2, 3, 4],
+        "total_timesteps": [2*(10**6), 4*(10**6), 6*(10**6)],
         "state_mode": "a",
         "reward_mode": "r"
     },
-{
-        "name": "r-r",
-        "n": [10, 20], 
-        "k": [3, 6],
-        "m": [1],
-        "total_timesteps": [2*(10**6), 4*(10**6)],
-        "state_mode": "r",
-        "reward_mode": "r"
-    },
-{
-        "name": "ar-r",
-        "n": [10, 20], 
-        "k": [3, 6],
-        "m": [1],
-        "total_timesteps": [2*(10**6), 4*(10**6)],
-        "state_mode": "ar",
-        "reward_mode": "r"
-    },
+
 {
         "name": "a-a",
-        "n": [10, 20], 
-        "k": [3, 6],
-        "m": [1],
-        "total_timesteps": [2*(10**6), 4*(10**6)],
+        "n": [10, 20, 30],
+        "k": [1],
+        "m": [2, 3, 4],
+        "total_timesteps": [2*(10**6), 4*(10**6), 6*(10**6)],
         "state_mode": "a",
         "reward_mode": "a"
     },
-{
-        "name": "r-a",
-        "n": [10, 20], 
-        "k": [3, 6],
-        "m": [1],
-        "total_timesteps": [2*(10**6), 4*(10**6)],
-        "state_mode": "r",
-        "reward_mode": "a"
-    },
-{
-        "name": "ar-a",
-        "n": [10, 20], 
-        "k": [3, 6],
-        "m": [1],
-        "total_timesteps": [2*(10**6), 4*(10**6)],
-        "state_mode": "ar",
-        "reward_mode": "a"
-    },
+
 ]
 
 
