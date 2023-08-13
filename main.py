@@ -35,6 +35,7 @@ def q_compatible_run(env, model, threshold):
     counter = 0
     values = []
     actions = []
+    used_optimal = 0
     while True:
         # env.render()
         q_values = model.policy.q_net.forward(model.policy.obs_to_tensor(observation)[0])
@@ -44,6 +45,7 @@ def q_compatible_run(env, model, threshold):
         if len(possible_actions) == 0:
             action, _states = model.predict(observation)
             action = action.item()
+            used_optimal = 1
         else:
             action = np.random.choice(possible_actions)
         actions.append(action)
@@ -53,12 +55,12 @@ def q_compatible_run(env, model, threshold):
         # print(action, observation, reward, done, info)
         if done:
             break
-    if reward_sum < 0 or len(values) <= 1:
+    if len(values) <= 1:#reward_sum < 0 or len(values) <= 1:
         print("bad episode")
         print(values)
         print([env.action_space.action_mapper[a] for a in actions])
         print(reward_sum)
-    return 1 if reward_sum == 0 else 0
+    return (1, used_optimal) if reward_sum == 0 else (0, used_optimal)
 
 
 def evaluate_model(model, state_mode, reward_mode, n):
@@ -81,58 +83,62 @@ def evaluate_model(model, state_mode, reward_mode, n):
         # print(action, observation, reward, done, info)
         if done:
             break
-    print("optimal reward: ", reward_sum)
-    results["optimal"] = reward_sum
+    #print("optimal reward: ", reward_sum)
+    results["optimal"] = (reward_sum, 1)
     num_success = 0
+    num_used_optimal = 0
     for threshold in np.arange(-1.2, -0.1, 0.1):
         for i in range(100):
-            num_success += q_compatible_run(env, model, threshold)
+            success, used_optimal = q_compatible_run(env, model, threshold)
+            num_success += success
+            num_used_optimal += used_optimal
         print("q compatible success rate for threshold", threshold, ":", num_success/100)
-        results[threshold] = num_success/100
+        results[threshold] = (num_success/100, num_used_optimal/100)
         num_success = 0
+        num_used_optimal = 0
     return results
 
 
 experiments = [
     {
         "name": "a-r",
-        "n": [18, 21],
-        "total_timesteps": [20*(10**5), 24*(10**5)],
+        "n": [50],
+        "total_timesteps": [10**7],
         "state_mode": "a",
         "reward_mode": "r"
     },
 {
         "name": "r-r",
-        "n": [18, 21],
-        "total_timesteps": [20*(10**5), 24*(10**5)],
+        "n": [50],
+        "total_timesteps": [10**7],
         "state_mode": "r",
         "reward_mode": "r"
     },
 {
         "name": "ar-r",
-        "n": [18, 21],
-        "total_timesteps": [20*(10**5), 24*(10**5)],
+        "n": [50],
+        "total_timesteps": [10**7],
         "state_mode": "ar",
         "reward_mode": "r"
     },
 {
         "name": "a-a",
-        "n": [18, 21],
-        "total_timesteps": [20*(10**5), 24*(10**5)],
+        "n": [50],
+        "total_timesteps": [10**7],
         "state_mode": "a",
         "reward_mode": "a"
     },
 {
         "name": "r-a",
-        "n": [18, 21],
-        "total_timesteps": [20*(10**5), 24*(10**5)],
+        "n": [50],
+        "total_timesteps": [10**7],
         "state_mode": "r",
         "reward_mode": "a"
     },
 {
         "name": "ar-a",
-        "n": [18, 21],
-        "total_timesteps": [20*(10**5), 24*(10**5)],
+        "n": [50],
+        "total_timesteps": [10**7],
         "state_mode": "ar",
         "reward_mode": "a"
     },
@@ -152,12 +158,6 @@ for e in experiments:
         params["n"] = e["n"][i]
         env = gym_env_generator(e["state_mode"], e["reward_mode"])
         env = Monitor(env, log_dir)
-        # model = DQN(MlpPolicy(observation_space=env.observation_space,
-        #                       action_space=env.action_space,
-        #                       lr_schedule=lambda x: 0.001,
-        #                       net_arch=[6,6]),
-        #             env,
-        #             verbose=1)
         model = DQN("MlpPolicy", env, verbose=0)
         model.learn(total_timesteps=e["total_timesteps"][i])
         print(model.exploration_rate)
@@ -169,10 +169,20 @@ for e in experiments:
         all_results[e["name"]][e["n"][i]] = evaluate_model(model, e["state_mode"], e["reward_mode"], e["n"])
         env.close()
 
+print("Q compatible runs success rate")
 for k, v in all_results.items():
     print(k)
     for n, a in v.items():
         print(n, end=",")
         for k2, v2 in a.items():
-            print(v2, end=",")
+            print(v2[0], end=",")
+        print()
+
+print("Q compatible runs used optimal rate")
+for k, v in all_results.items():
+    print(k)
+    for n, a in v.items():
+        print(n, end=",")
+        for k2, v2 in a.items():
+            print(v2[1], end=",")
         print()
