@@ -8,7 +8,7 @@ from bp_env import BPEnv
 from bp_action_space import BPActionSpace
 import numpy as np
 
-def gym_env_generator(state_mode, reward_mode):
+def gym_env_generator(state_mode, reward_mode, n):
     mapper = {
         0: "H",
         1: "C"
@@ -26,7 +26,7 @@ def gym_env_generator(state_mode, reward_mode):
         dim += 1
     if reward_mode == "a":
         dim += 1
-    env.observation_space = gym.spaces.Box(0, 4, shape=(dim,))
+    env.observation_space = gym.spaces.Box(0, n, shape=(dim,))
     return env
 
 def q_compatible_run(env, model, threshold):
@@ -65,7 +65,7 @@ def q_compatible_run(env, model, threshold):
 
 def evaluate_model(model, state_mode, reward_mode, n):
     results = {}
-    env = gym_env_generator(state_mode, reward_mode)
+    env = gym_env_generator(state_mode, reward_mode, n)
     total_rewards = 0
 
     observation = env.reset()
@@ -102,43 +102,49 @@ def evaluate_model(model, state_mode, reward_mode, n):
 experiments = [
     {
         "name": "a-r",
-        "n": [50],
-        "total_timesteps": [10**7],
+        "n": [10, 20], 
+        "k": [3, 6],
+        "total_timesteps": [2*(10**6), 4*(10**6)],
         "state_mode": "a",
         "reward_mode": "r"
     },
 {
         "name": "r-r",
-        "n": [50],
-        "total_timesteps": [10**7],
+        "n": [10, 20], 
+        "k": [3, 6],
+        "total_timesteps": [2*(10**6), 4*(10**6)],
         "state_mode": "r",
         "reward_mode": "r"
     },
 {
         "name": "ar-r",
-        "n": [50],
-        "total_timesteps": [10**7],
+        "n": [10, 20], 
+        "k": [3, 6],
+        "total_timesteps": [2*(10**6), 4*(10**6)],
         "state_mode": "ar",
         "reward_mode": "r"
     },
 {
         "name": "a-a",
-        "n": [50],
-        "total_timesteps": [10**7],
+        "n": [10, 20], 
+        "k": [3, 6],
+        "total_timesteps": [2*(10**6), 4*(10**6)],
         "state_mode": "a",
         "reward_mode": "a"
     },
 {
         "name": "r-a",
-        "n": [50],
-        "total_timesteps": [10**7],
+        "n": [10, 20], 
+        "k": [3, 6],
+        "total_timesteps": [2*(10**6), 4*(10**6)],
         "state_mode": "r",
         "reward_mode": "a"
     },
 {
         "name": "ar-a",
-        "n": [50],
-        "total_timesteps": [10**7],
+        "n": [10, 20], 
+        "k": [3, 6],
+        "total_timesteps": [2*(10**6), 4*(10**6)],
         "state_mode": "ar",
         "reward_mode": "a"
     },
@@ -148,26 +154,28 @@ experiments = [
 from hot_cold import init_bprogram, params
 
 all_results = {}
-for e in experiments:
+for e in experiments[:1]:
     print(e)
     all_results[e["name"]] = {}
     # Create log dir
     for i in range(len(e["n"])):
-        log_dir = "output/" + e["name"] + "/" + str(e["n"][i]) + "/"
-        os.makedirs(log_dir, exist_ok=True)
-        params["n"] = e["n"][i]
-        env = gym_env_generator(e["state_mode"], e["reward_mode"])
-        env = Monitor(env, log_dir)
-        model = DQN("MlpPolicy", env, verbose=0)
-        model.learn(total_timesteps=e["total_timesteps"][i])
-        print(model.exploration_rate)
-        model.exploration_rate = 0
-        model.action_space.bprogram = None
-        model.save(log_dir + e["name"])
-        del model  # remove to demonstrate saving and loading
-        model = DQN.load(log_dir + e["name"])
-        all_results[e["name"]][e["n"][i]] = evaluate_model(model, e["state_mode"], e["reward_mode"], e["n"])
-        env.close()
+        for j in range(len(e["k"])):
+            log_dir = "output/" + e["name"] + "/n_" + str(e["n"][i]) + "_k_" + str(e["k"][i]) + "/"
+            os.makedirs(log_dir, exist_ok=True)
+            params["n"] = e["n"][i]
+            params["k"] = e["k"][i]
+            env = gym_env_generator(e["state_mode"], e["reward_mode"], params["n"])
+            env = Monitor(env, log_dir)
+            model = DQN("MlpPolicy", env, verbose=0)
+            model.learn(total_timesteps=e["total_timesteps"][i])
+            model.exploration_rate = 0
+            model.action_space.bprogram = None
+            model.save(log_dir + e["name"])
+            del model  # remove to demonstrate saving and loading
+            model = DQN.load(log_dir + e["name"])
+            print(model.exploration_rate)
+            all_results[e["name"]][e["n"][i]] = evaluate_model(model, e["state_mode"], e["reward_mode"], e["n"][i])
+            env.close()
 
 print("Q compatible runs success rate")
 for k, v in all_results.items():

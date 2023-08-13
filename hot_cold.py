@@ -4,7 +4,8 @@ from bppy.model.b_thread import b_thread
 
 state = "state"
 params = {
-    "n": None
+    "n": None,
+    "k": None
 }
 
 
@@ -26,8 +27,12 @@ def add_b():
 
 def control():
     while True:
-        yield {waitFor: bp.BEvent("H"), state: 0, mustFinish: False}
-        yield {waitFor: bp.BEvent("C"), block: bp.BEvent("H"), state: 1, mustFinish: False}
+        for i in range(0, params["k"]):
+            e = yield {waitFor: [bp.BEvent("C"), bp.BEvent("H")], state: i, mustFinish: False}
+            if e.name == "C":
+                break
+        if e.name == "H":
+            yield {waitFor: bp.BEvent("C"), block: bp.BEvent("H"), state: params["k"], mustFinish: False}
 
 
 def init_bprogram():
