@@ -127,7 +127,7 @@ env = gym_env_generator(args.state_mode, args.reward_mode, params["n"], params["
 env = Monitor(env, log_dir)
 os.makedirs(log_dir, exist_ok=True)
 model = DQN("MlpPolicy", env, verbose=0)
-model.learn(total_timesteps=args.total_timesteps)
+model.learn(total_timesteps=int(args.total_timesteps))
 model.exploration_rate = 0
 model.action_space.bprogram = None
 model.save(log_dir + "model")
