@@ -39,3 +39,9 @@ if __name__ == '__main__':
         print(action)
         state, reward, done, _ = env.step(action)
         print(state, reward, done)
+
+
+
+
+
+
