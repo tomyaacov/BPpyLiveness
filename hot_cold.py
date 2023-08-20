@@ -39,6 +39,11 @@ def init_bprogram():
                        event_selection_strategy=bp.SimpleEventSelectionStrategy(),
                        listener=bp.PrintBProgramRunnerListener())
 
+
+def get_event_list():
+    return [bp.BEvent("H")] + [bp.BEvent("C" + str(x)) for x in range(params["m"])]
+
+
 if __name__ == '__main__':
     params["n"] = 2
     params["k"] = 1
