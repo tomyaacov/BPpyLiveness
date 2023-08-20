@@ -103,20 +103,20 @@ def evaluate_model(model, state_mode, reward_mode, n, m):
 experiments = [
     {
         "name": "a-r",
-        "n": [10, 20, 30],
+        "n": [10, 20],
         "k": [1],
-        "m": [2, 3, 4],
-        "total_timesteps": [2*(10**6), 4*(10**6), 6*(10**6)],
+        "m": [2, 3],
+        "total_timesteps": [2*(10**6), 4*(10**6)],
         "state_mode": "a",
         "reward_mode": "r"
     },
 
 {
         "name": "a-a",
-        "n": [10, 20, 30],
+        "n": [10, 20],
         "k": [1],
-        "m": [2, 3, 4],
-        "total_timesteps": [2*(10**6), 4*(10**6), 6*(10**6)],
+        "m": [2, 3],
+        "total_timesteps": [2*(10**6), 4*(10**6)],
         "state_mode": "a",
         "reward_mode": "a"
     },
@@ -138,15 +138,15 @@ for e in experiments:
                 params["m"] = e["m"][m]
                 log_dir = "output/" + e["name"] + "/n_" + str(params["n"]) + "_k_" + str(params["k"]) + "_m_" + str(params["m"]) + "/"
                 print(log_dir)
-                os.makedirs(log_dir, exist_ok=True)
                 env = gym_env_generator(e["state_mode"], e["reward_mode"], params["n"], params["m"])
-                env = Monitor(env, log_dir)
-                model = DQN("MlpPolicy", env, verbose=0)
-                model.learn(total_timesteps=e["total_timesteps"][i])
-                model.exploration_rate = 0
-                model.action_space.bprogram = None
-                model.save(log_dir + e["name"])
-                del model  # remove to demonstrate saving and loading
+                # env = Monitor(env, log_dir)
+                # os.makedirs(log_dir, exist_ok=True)
+                # model = DQN("MlpPolicy", env, verbose=0)
+                # model.learn(total_timesteps=e["total_timesteps"][i])
+                # model.exploration_rate = 0
+                # model.action_space.bprogram = None
+                # model.save(log_dir + e["name"])
+                # del model  # remove to demonstrate saving and loading
                 model = DQN.load(log_dir + e["name"])
                 all_results[e["name"]][log_dir] = evaluate_model(model, e["state_mode"], e["reward_mode"], params["n"], params["m"])
                 env.close()

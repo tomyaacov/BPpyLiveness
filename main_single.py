@@ -7,13 +7,26 @@ from stable_baselines3.common.monitor import Monitor
 from bp_env import BPEnv
 from bp_action_space import BPActionSpace
 import numpy as np
+import argparse
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("--n", default=3)
+parser.add_argument("--k", default=1)
+parser.add_argument("--m", default=1)
+parser.add_argument("--total_timesteps", default=10000)
+parser.add_argument("--state_mode", default="a")
+parser.add_argument("--reward_mode", default="r")
+
+args = parser.parse_args()
+
 
 def gym_env_generator(state_mode, reward_mode, n, m):
     mapper = {
         0: "H"
     }
     for i in range(m):
-        mapper[i+1] = "C" + str(i)
+        mapper[i + 1] = "C" + str(i)
     env = BPEnv()
     env.bprogram_generator = init_bprogram
     env.action_space = BPActionSpace(mapper)
@@ -29,6 +42,7 @@ def gym_env_generator(state_mode, reward_mode, n, m):
         dim += 1
     env.observation_space = gym.spaces.Box(0, n, shape=(dim,))
     return env
+
 
 def q_compatible_run(env, model, threshold):
     observation = env.reset()
@@ -56,7 +70,7 @@ def q_compatible_run(env, model, threshold):
         # print(action, observation, reward, done, info)
         if done:
             break
-    if len(values) <= 1:#reward_sum < 0 or len(values) <= 1:
+    if len(values) <= 1:  # reward_sum < 0 or len(values) <= 1:
         print("bad episode")
         print(values)
         print([env.action_space.action_mapper[a] for a in actions])
@@ -84,7 +98,7 @@ def evaluate_model(model, state_mode, reward_mode, n, m):
         # print(action, observation, reward, done, info)
         if done:
             break
-    #print("optimal reward: ", reward_sum)
+    # print("optimal reward: ", reward_sum)
     results["optimal"] = (reward_sum, 1)
     num_success = 0
     num_used_optimal = 0
@@ -93,112 +107,41 @@ def evaluate_model(model, state_mode, reward_mode, n, m):
             success, used_optimal = q_compatible_run(env, model, threshold)
             num_success += success
             num_used_optimal += used_optimal
-        print("q compatible success rate for threshold", threshold, ":", num_success/100)
-        results[threshold] = (num_success/100, num_used_optimal/100)
+        print("q compatible success rate for threshold", threshold, ":", num_success / 100)
+        results[threshold] = (num_success / 100, num_used_optimal / 100)
         num_success = 0
         num_used_optimal = 0
     return results
 
 
-experiments = [
-    {
-        "name": "a-r",
-        "n": [50],
-        "k": [1],
-        "m": [1],
-        "total_timesteps": [10**7],
-        "state_mode": "a",
-        "reward_mode": "r"
-    },
-{
-        "name": "r-r",
-        "n": [50],
-        "k": [1],
-        "m": [1],
-        "total_timesteps": [10**7],
-        "state_mode": "r",
-        "reward_mode": "r"
-    },
-{
-        "name": "ar-r",
-        "n": [50],
-        "k": [1],
-        "m": [1],
-        "total_timesteps": [10**7],
-        "state_mode": "ar",
-        "reward_mode": "r"
-    },
-{
-        "name": "a-a",
-        "n": [50],
-        "k": [1],
-        "m": [1],
-        "total_timesteps": [10**7],
-        "state_mode": "a",
-        "reward_mode": "a"
-    },
-{
-        "name": "r-a",
-        "n": [50],
-        "k": [1],
-        "m": [1],
-        "total_timesteps": [10**7],
-        "state_mode": "r",
-        "reward_mode": "a"
-    },
-{
-        "name": "ar-a",
-        "n": [50],
-        "k": [1],
-        "m": [1],
-        "total_timesteps": [10**7],
-        "state_mode": "ar",
-        "reward_mode": "a"
-    },
-]
-
-
 from hot_cold import init_bprogram, params
 
-all_results = {}
-for e in experiments:
-    all_results[e["name"]] = {}
-    # Create log dir
-    for i in range(len(e["n"])):
-        for j in range(len(e["k"])):
-            for m in range(len(e["m"])):
-                params["n"] = e["n"][i]
-                params["k"] = e["k"][j]
-                params["m"] = e["m"][m]
-                log_dir = "output/" + e["name"] + "/n_" + str(params["n"]) + "_k_" + str(params["k"]) + "_m_" + str(params["m"]) + "/"
-                print(log_dir)
-                env = gym_env_generator(e["state_mode"], e["reward_mode"], params["n"], params["m"])
-                env = Monitor(env, log_dir)
-                # os.makedirs(log_dir, exist_ok=True)
-                # model = DQN("MlpPolicy", env, verbose=0)
-                # model.learn(total_timesteps=e["total_timesteps"][i])
-                # model.exploration_rate = 0
-                # model.action_space.bprogram = None
-                # model.save(log_dir + e["name"])
-                # del model  # remove to demonstrate saving and loading
-                model = DQN.load(log_dir + e["name"])
-                all_results[e["name"]][log_dir] = evaluate_model(model, e["state_mode"], e["reward_mode"], params["n"], params["m"])
-                env.close()
+params["n"] = int(args.n)
+params["k"] = int(args.k)
+params["m"] = int(args.m)
+name = "_".join([str(key) + "_" + str(value) for key, value in vars(args).items()])
+
+log_dir = "output/" + name + "/"
+print(log_dir)
+env = gym_env_generator(args.state_mode, args.reward_mode, params["n"], params["m"])
+env = Monitor(env, log_dir)
+os.makedirs(log_dir, exist_ok=True)
+model = DQN("MlpPolicy", env, verbose=0)
+model.learn(total_timesteps=args.total_timesteps)
+model.exploration_rate = 0
+model.action_space.bprogram = None
+model.save(log_dir + "model")
+del model  # remove to demonstrate saving and loading
+model = DQN.load(log_dir + "model")
+results = evaluate_model(model, args.state_mode, args.reward_mode, params["n"], params["m"])
+env.close()
 
 print("Q compatible runs success rate")
-for k, v in all_results.items():
-    print(k)
-    for n, a in v.items():
-        print(n, end=",")
-        for k2, v2 in a.items():
-            print(v2[0], end=",")
-        print()
+for k2, v2 in results.items():
+    print(v2[0], end=",")
+print()
 
 print("Q compatible runs used optimal rate")
-for k, v in all_results.items():
-    print(k)
-    for n, a in v.items():
-        print(n, end=",")
-        for k2, v2 in a.items():
-            print(v2[1], end=",")
-        print()
+for k2, v2 in results.items():
+    print(v2[1], end=",")
+print()
