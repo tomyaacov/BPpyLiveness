@@ -1,5 +1,5 @@
 import argparse
-from dfs import DFSBProgram
+from bppy.utils.dfs import DFSBProgram
 
 parser = argparse.ArgumentParser()
 
@@ -16,6 +16,6 @@ params["k"] = int(args.k)
 params["m"] = int(args.m)
 name = "_".join([str(key) + "_" + str(value) for key, value in vars(args).items()])
 
-dfs = DFSBProgram(init_bprogram, get_event_list())
+dfs = DFSBProgram(init_bprogram, get_event_list(), max_trace_length=10**10)
 init_s, visited = dfs.run()
 print("number of states:" , len(visited))

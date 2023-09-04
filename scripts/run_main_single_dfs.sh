@@ -4,9 +4,9 @@
 #SBATCH --time 7-00:00:00 ### limit the time of job running. Format: D-H:MM:SS
 #SBATCH --job-name run_main ### name of the job. replace my_job with your desired job name
 #SBATCH --output run_main.out ### output log for running job - %J is the job number variable
-#SBATCH --mail-user=tomya@post.bgu.ac.il ### users email for sending job status notifications ñ replace with yours
-#SBATCH --mail-type=BEGIN,END,FAIL ### conditions when to send the email. ALL,BEGIN,END,FAIL, REQUEU, NONE
-#SBATCH --mem=32G ### total amount of RAM // 500
+##SBATCH --mail-user=tomya@post.bgu.ac.il ### users email for sending job status notifications ñ replace with yours
+##SBATCH --mail-type=BEGIN,END,FAIL ### conditions when to send the email. ALL,BEGIN,END,FAIL, REQUEU, NONE
+#SBATCH --mem=8G ### total amount of RAM // 500
 #SBATCH --ntasks=1
 
 ### Start you code below ####
