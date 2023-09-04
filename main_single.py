@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--n", default=3)
 parser.add_argument("--k", default=1)
 parser.add_argument("--m", default=1)
-parser.add_argument("--total_timesteps", default=10000)
+parser.add_argument("--total_timesteps", default=1000)
 parser.add_argument("--state_mode", default="a")
 parser.add_argument("--reward_mode", default="r")
 
