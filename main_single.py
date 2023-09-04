@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 import os
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.dqn import MlpPolicy
@@ -45,7 +45,7 @@ def gym_env_generator(state_mode, reward_mode, n, m):
 
 
 def q_compatible_run(env, model, threshold):
-    observation = env.reset()
+    observation, _ = env.reset()
     reward_sum = 0
     counter = 0
     values = []
@@ -64,7 +64,7 @@ def q_compatible_run(env, model, threshold):
         else:
             action = np.random.choice(possible_actions)
         actions.append(action)
-        observation, reward, done, info = env.step(action)
+        observation, reward, done, _, info = env.step(action)
         reward_sum += reward
         counter += 1
         # print(action, observation, reward, done, info)
@@ -83,7 +83,7 @@ def evaluate_model(model, state_mode, reward_mode, n, m):
     env = gym_env_generator(state_mode, reward_mode, n, m)
     total_rewards = 0
 
-    observation = env.reset()
+    observation, _ = env.reset()
     reward_sum = 0
     counter = 0
     values = []
@@ -92,7 +92,7 @@ def evaluate_model(model, state_mode, reward_mode, n, m):
         # env.render()
         action, _states = model.predict(observation)
         actions.append(action)
-        observation, reward, done, info = env.step(action.item())
+        observation, reward, done, _, info = env.step(action.item())
         reward_sum += reward
         counter += 1
         # print(action, observation, reward, done, info)

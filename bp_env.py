@@ -1,7 +1,8 @@
-import gym
+
+import gymnasium as gym
 # from gym import error, spaces, utils, GoalEnv
-from gym.utils import seeding
-from gym import spaces
+from gymnasium.utils import seeding
+from gymnasium import spaces
 import numpy as np
 # from bp.bp_action_space import BPActionSpace
 import random
@@ -38,7 +39,7 @@ class BPEnv(gym.Env):
                 # reward = self._reward()
                 reward = -1
                 self.steps_counter += 1
-                return self.last_state, reward, True, {}
+                return self.last_state, reward, True, False, {}
             else:
                 action = action_options[0]
 
@@ -55,9 +56,9 @@ class BPEnv(gym.Env):
             bprogram_done = bprogram_done or self.steps_counter == self.episode_timeout
         self.last_state = new_state
         # print(new_state)
-        return new_state, reward, bprogram_done, {}
+        return new_state, reward, bprogram_done, False, {}
 
-    def reset(self):
+    def reset(self, seed=None):
         self.steps_counter = 0
         self.aggregate_reward = 0
         self.must_finish_length = 0
@@ -70,7 +71,7 @@ class BPEnv(gym.Env):
         self.hot_states = [False] * len(self.bprogram.tickets)
         self.last_state = state
         # print(state)
-        return state
+        return state, None
 
     def render(self, mode='human', close=False):
         raise NotImplementedError
