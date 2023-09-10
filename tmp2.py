@@ -12,9 +12,7 @@ import argparse
 
 from hot_cold import init_bprogram, params
 
-params["n"] = 50
-params["k"] = 1
-params["m"] = 1
+
 
 def gym_env_generator(state_mode, reward_mode, n, m):
     mapper = {
@@ -38,10 +36,13 @@ def gym_env_generator(state_mode, reward_mode, n, m):
     env.observation_space = gym.spaces.Box(0, n, shape=(dim,))
     return env
 
-name = "n_50_k_1_m_1_total_timesteps_5000000_state_mode_a_reward_mode_r"
+name = "n_20_k_1_m_3_total_timesteps_4000000_state_mode_a_reward_mode_r"
+params["n"] = 20
+params["k"] = 1
+params["m"] = 3
 log_dir = "output/" + name + "/"
 env = gym_env_generator("a", "r", params["n"], params["m"])
-env = Monitor(env, log_dir)
+#env = Monitor(env, log_dir)
 os.makedirs(log_dir, exist_ok=True)
 model = PPO("MlpPolicy", env, verbose=0)
 model = PPO.load(log_dir + "model")

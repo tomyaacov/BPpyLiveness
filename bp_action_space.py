@@ -31,3 +31,6 @@ class BPActionSpace(Discrete):
         possible_events = self.bprogram.event_selection_strategy.selectable_events(self.bprogram.tickets)
         possible_events = [x.name for x in possible_events]
         return [k for k, v in self.action_mapper.items() if v in possible_events]
+
+    def possible_actions(self):
+        return self._possible_actions()

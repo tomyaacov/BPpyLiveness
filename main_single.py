@@ -12,10 +12,10 @@ import argparse
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--n", default=5)
+parser.add_argument("--n", default=10)
 parser.add_argument("--k", default=1)
 parser.add_argument("--m", default=1)
-parser.add_argument("--total_timesteps", default=10000)
+parser.add_argument("--total_timesteps", default=100000)
 parser.add_argument("--state_mode", default="a")
 parser.add_argument("--reward_mode", default="r")
 
