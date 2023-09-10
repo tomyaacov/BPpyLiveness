@@ -2,19 +2,20 @@ import gymnasium as gym
 import os
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.dqn import MlpPolicy
-from stable_baselines3 import DQN
+from stable_baselines3 import DQN, PPO
 from stable_baselines3.common.monitor import Monitor
 from bp_env import BPEnv
+from bp_callback import BPCallback
 from bp_action_space import BPActionSpace
 import numpy as np
 import argparse
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--n", default=3)
+parser.add_argument("--n", default=5)
 parser.add_argument("--k", default=1)
 parser.add_argument("--m", default=1)
-parser.add_argument("--total_timesteps", default=1000)
+parser.add_argument("--total_timesteps", default=10000)
 parser.add_argument("--state_mode", default="a")
 parser.add_argument("--reward_mode", default="r")
 
@@ -126,22 +127,23 @@ print(log_dir)
 env = gym_env_generator(args.state_mode, args.reward_mode, params["n"], params["m"])
 env = Monitor(env, log_dir)
 os.makedirs(log_dir, exist_ok=True)
-model = DQN("MlpPolicy", env, verbose=0)
-model.learn(total_timesteps=int(args.total_timesteps))
-model.exploration_rate = 0
+model = PPO("MlpPolicy", env, verbose=0)
+model.learn(total_timesteps=int(args.total_timesteps),
+            callback=BPCallback())
+#model.exploration_rate = 0
 model.action_space.bprogram = None
 model.save(log_dir + "model")
-del model  # remove to demonstrate saving and loading
-model = DQN.load(log_dir + "model")
-results = evaluate_model(model, args.state_mode, args.reward_mode, params["n"], params["m"])
-env.close()
-
-print("Q compatible runs success rate")
-for k2, v2 in results.items():
-    print(v2[0], end=",")
-print()
-
-print("Q compatible runs used optimal rate")
-for k2, v2 in results.items():
-    print(v2[1], end=",")
-print()
+# del model  # remove to demonstrate saving and loading
+# model = DQN.load(log_dir + "model")
+# results = evaluate_model(model, args.state_mode, args.reward_mode, params["n"], params["m"])
+# env.close()
+#
+# print("Q compatible runs success rate")
+# for k2, v2 in results.items():
+#     print(v2[0], end=",")
+# print()
+#
+# print("Q compatible runs used optimal rate")
+# for k2, v2 in results.items():
+#     print(v2[1], end=",")
+# print()
