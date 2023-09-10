@@ -36,7 +36,7 @@ class BPCallback(BaseCallback):
         actions = []
         while True:
             # env.render()
-            action, _states = model.predict(observation)
+            action, _states = model.predict(observation, deterministic=True)
             actions.append(action)
             observation, reward, done, info = env.step(action)
             reward_sum += reward

@@ -2,7 +2,7 @@ from stable_baselines3.common import results_plotter
 from stable_baselines3.common.monitor import load_results
 import numpy as np
 from matplotlib import pyplot as plt
-folder = "output/n_10_k_1_m_1_total_timesteps_50000_state_mode_a_reward_mode_r/"
+folder = "output/n_50_k_1_m_1_total_timesteps_5000000_state_mode_a_reward_mode_r/"
 
 title = "k_3_m_1"
 EPISODES_WINDOW = 100
