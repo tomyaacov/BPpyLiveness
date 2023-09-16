@@ -7,7 +7,7 @@ class BPCallbackMask(BaseCallback):
 
     :param verbose: Verbosity level: 0 for no output, 1 for info messages, 2 for debug messages
     """
-    def __init__(self, verbose=0):
+    def __init__(self, verbose=0, repeat=1):
         super(BPCallbackMask, self).__init__(verbose)
         # Those variables will be accessible in the callback
         # (they are defined in the base class)
@@ -27,27 +27,29 @@ class BPCallbackMask(BaseCallback):
         # # to have access to the parent object
         # self.parent = None  # type: Optional[BaseCallback]
         self.should_end = False
+        self.repeat = repeat
 
     def test(self, model, env, threshold=-0.5):
-        _env = env.envs[0]
-        observation = env.reset()
-        reward_sum = 0
-        counter = 0
-        values = []
-        actions = []
-        while True:
-            action_masks = _env.action_masks()
-            action, _states = model.predict(observation, deterministic=True, action_masks=action_masks)
-            actions.append(action)
-            observation, reward, done, info = env.step(action)
-            reward_sum += reward
-            counter += 1
-            # print(action, observation, reward, done, info)
-            if done[0]:
-                break
-        print("optimal reward: ", reward_sum)
-        if reward_sum > threshold:
-            self.should_end = True
+        for i in range(self.repeat):
+            _env = env.envs[0]
+            observation = env.reset()
+            reward_sum = 0
+            counter = 0
+            values = []
+            actions = []
+            while True:
+                action_masks = _env.action_masks()
+                action, _states = model.predict(observation, deterministic=True, action_masks=action_masks)
+                actions.append(action)
+                observation, reward, done, info = env.step(action)
+                reward_sum += reward
+                counter += 1
+                # print(action, observation, reward, done, info)
+                if done[0]:
+                    break
+            #print("optimal reward: ", reward_sum)
+            if reward_sum > threshold:
+                self.should_end = True
 
     def _on_training_start(self) -> None:
         """
