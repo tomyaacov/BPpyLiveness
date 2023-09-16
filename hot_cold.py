@@ -31,7 +31,7 @@ def control():
             if e.name == "C":
                 break
         if e.name == "H":
-            yield {waitFor: bp.All(), block: bp.BEvent("H"), state: params["k"], mustFinish: False}
+            yield {waitFor: bp.BEvent("C0"), block: bp.BEvent("H"), state: params["k"], mustFinish: False}
 
 
 def init_bprogram():

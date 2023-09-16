@@ -53,15 +53,22 @@ name = "_".join([str(key) + "_" + str(value) for key, value in vars(args).items(
 
 log_dir = "output/" + name + "/"
 print(log_dir)
-env = gym_env_generator(args.state_mode, args.reward_mode, params["n"], params["m"])
 
-env = Monitor(env, log_dir)
-os.makedirs(log_dir, exist_ok=True)
-model = MaskablePPO("MlpPolicy", env, verbose=0)
+steps = []
 
+for i in range(10):
+    env = gym_env_generator(args.state_mode, args.reward_mode, params["n"], params["m"])
 
-model.learn(total_timesteps=int(args.total_timesteps),
-            callback=BPCallbackMask())
+    env = Monitor(env, log_dir)
+    os.makedirs(log_dir, exist_ok=True)
+    model = MaskablePPO("MlpPolicy", env, verbose=0)
 
-model.action_space.bprogram = None
-model.save(log_dir + "model")
+    model.learn(total_timesteps=int(args.total_timesteps),
+                callback=BPCallbackMask())
+    steps.append(env.get_total_steps())
+
+    model.action_space.bprogram = None
+    model.save(log_dir + "model")
+
+print("steps: ", steps)
+print("average steps: ", sum(steps) / len(steps))

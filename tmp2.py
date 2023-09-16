@@ -2,9 +2,9 @@ import gymnasium as gym
 import os
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.dqn import MlpPolicy
-from stable_baselines3 import DQN, PPO
+from sb3_contrib import MaskablePPO
 from stable_baselines3.common.monitor import Monitor
-from bp_env import BPEnv
+from bp_env_mask import BPEnvMask
 from bp_callback import BPCallback
 from bp_action_space import BPActionSpace
 import numpy as np
@@ -20,7 +20,7 @@ def gym_env_generator(state_mode, reward_mode, n, m):
     }
     for i in range(m):
         mapper[i + 1] = "C" + str(i)
-    env = BPEnv()
+    env = BPEnvMask()
     env.bprogram_generator = init_bprogram
     env.action_space = BPActionSpace(mapper)
     env.action_mapper = mapper
@@ -36,16 +36,16 @@ def gym_env_generator(state_mode, reward_mode, n, m):
     env.observation_space = gym.spaces.Box(0, n, shape=(dim,))
     return env
 
-name = "n_20_k_1_m_3_total_timesteps_4000000_state_mode_a_reward_mode_r"
-params["n"] = 20
-params["k"] = 1
+name = "n_100_k_4_m_3_total_timesteps_10000000_state_mode_a_reward_mode_r"
+params["n"] = 100
+params["k"] = 4
 params["m"] = 3
 log_dir = "output/" + name + "/"
 env = gym_env_generator("a", "r", params["n"], params["m"])
 #env = Monitor(env, log_dir)
 os.makedirs(log_dir, exist_ok=True)
-model = PPO("MlpPolicy", env, verbose=0)
-model = PPO.load(log_dir + "model")
+model = MaskablePPO("MlpPolicy", env, verbose=0)
+model = MaskablePPO.load(log_dir + "model")
 
 observation, _ = env.reset()
 reward_sum = 0
@@ -54,7 +54,8 @@ values = []
 actions = []
 while True:
     # env.render()
-    action, _states = model.predict(observation, deterministic=True)
+    action_masks = env.action_masks()
+    action, _states = model.predict(observation, deterministic=True, action_masks=action_masks)
     actions.append(action)
     observation, reward, done, _, info = env.step(action.item())
     reward_sum += reward

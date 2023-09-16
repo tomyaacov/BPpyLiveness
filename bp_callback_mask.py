@@ -53,7 +53,6 @@ class BPCallbackMask(BaseCallback):
         """
         This method is called before the first rollout starts.
         """
-        pass
 
     def _on_rollout_start(self) -> None:
         """
@@ -72,8 +71,6 @@ class BPCallbackMask(BaseCallback):
 
         :return: (bool) If the callback returns False, training is aborted early.
         """
-        if self.should_end:
-            print(self.num_timesteps)
         return not self.should_end
 
     def _on_rollout_end(self) -> None:
