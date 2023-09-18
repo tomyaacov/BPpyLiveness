@@ -32,7 +32,7 @@ def gym_env_generator(state_mode, reward_mode):
     return env
 
 from tic_tac_toe import bp_gen
-log_dir = "output/ttt_total_timesteps_10000_state_mode_a_reward_mode_r/"
+log_dir = "output/ttt_total_timesteps_10000000_state_mode_a_reward_mode_r/"
 model = MaskablePPO.load(log_dir + "model")
 
 for i in range(1000):
@@ -47,6 +47,7 @@ for i in range(1000):
         action_masks = env.action_masks()
         action, _states = model.predict(observation, deterministic=True, action_masks=action_masks)
         action = action.item()
+        # action = env.action_space.sample()
         actions.append(action)
         observation, reward, done, _, info = env.step(action)
         print(env.action_space.action_mapper[action], observation, reward, done, info)

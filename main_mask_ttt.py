@@ -49,7 +49,7 @@ for i in range(1):
     model = MaskablePPO("MlpPolicy", env, verbose=0)
 
     model.learn(total_timesteps=int(args.total_timesteps),
-                callback=BPCallbackMask(repeat=1000))
+                callback=BPCallbackMask(repeat=5000))
     steps.append(model.num_timesteps)
     print(model.num_timesteps)
 
