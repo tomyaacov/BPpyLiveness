@@ -4,7 +4,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.dqn import MlpPolicy
 from stable_baselines3.common.monitor import Monitor
 from sb3_contrib import MaskablePPO
-from bp_env_mask import BPEnvMask
+from bp_env_ttt import BPEnvTTT
 from bp_callback_mask import BPCallbackMask
 from bp_action_space import BPActionSpace
 import numpy as np
@@ -20,9 +20,9 @@ args = parser.parse_args()
 
 
 def gym_env_generator(state_mode, reward_mode):
-    l = ['X' + str(i) + str(j) for i in range(3) for j in range(3)] + ['O' + str(i) + str(j) for i in range(3) for j in range(3)] + ['OWin', 'XWin', 'Draw']
+    l = ['O' + str(i) + str(j) for i in range(3) for j in range(3)] + ['OWin', 'XWin', 'Draw']
     mapper = {i: l[i] for i in range(len(l))}
-    env = BPEnvMask()
+    env = BPEnvTTT()
     env.bprogram_generator = bp_gen
     env.action_space = BPActionSpace(mapper)
     env.action_mapper = mapper
@@ -33,7 +33,7 @@ def gym_env_generator(state_mode, reward_mode):
 
 from tic_tac_toe import bp_gen
 
-for i in range(200):
+for i in range(1000):
     env = gym_env_generator(args.state_mode, args.reward_mode)
     s, _ = env.reset()
     print(s)

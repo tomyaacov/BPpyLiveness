@@ -12,7 +12,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--total_timesteps", default=10000000)
+parser.add_argument("--total_timesteps", default=100000)
 parser.add_argument("--state_mode", default="a")
 parser.add_argument("--reward_mode", default="r")
 
@@ -28,33 +28,31 @@ def gym_env_generator(state_mode, reward_mode):
     env.action_mapper = mapper
     env.state_mode = state_mode
     env.reward_mode = reward_mode
-    env.observation_space = gym.spaces.Box(-1, 1, shape=(10,))
+    env.observation_space = gym.spaces.Box(-1, 1, shape=(9,))
     return env
 
 from tic_tac_toe import bp_gen
+log_dir = "output/ttt_total_timesteps_10000_state_mode_a_reward_mode_r/"
+model = MaskablePPO.load(log_dir + "model")
 
-
-name = "ttt_" + "_".join([str(key) + "_" + str(value) for key, value in vars(args).items()])
-
-log_dir = "output/" + name + "/"
-print(log_dir)
-
-steps = []
-
-for i in range(1):
+for i in range(1000):
     env = gym_env_generator(args.state_mode, args.reward_mode)
-
-    env = Monitor(env, log_dir)
-    os.makedirs(log_dir, exist_ok=True)
-    model = MaskablePPO("MlpPolicy", env, verbose=0)
-
-    model.learn(total_timesteps=int(args.total_timesteps),
-                callback=BPCallbackMask(repeat=1000))
-    steps.append(model.num_timesteps)
-    print(model.num_timesteps)
-
-    model.action_space.bprogram = None
-    model.save(log_dir + "model")
-
-print("steps: ", steps)
-print("average steps: ", sum(steps) / len(steps))
+    observation, _ = env.reset()
+    print(observation)
+    reward_sum = 0
+    counter = 0
+    values = []
+    actions = []
+    while True:
+        action_masks = env.action_masks()
+        action, _states = model.predict(observation, deterministic=True, action_masks=action_masks)
+        action = action.item()
+        actions.append(action)
+        observation, reward, done, _, info = env.step(action)
+        print(env.action_space.action_mapper[action], observation, reward, done, info)
+        reward_sum += reward
+        counter += 1
+        # print(action, observation, reward, done, info)
+        if done:
+            break
+    # print("optimal reward: ", reward_sum)

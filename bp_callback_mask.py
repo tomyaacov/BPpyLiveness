@@ -30,7 +30,30 @@ class BPCallbackMask(BaseCallback):
         self.repeat = repeat
 
     def test(self, model, env, threshold=-0.5):
-        for i in range(self.repeat):
+        if self.repeat > 1:
+            rewards = []
+            for i in range(self.repeat):
+                _env = env.envs[0]
+                observation = env.reset()
+                reward_sum = 0
+                counter = 0
+                values = []
+                actions = []
+                while True:
+                    action_masks = _env.action_masks()
+                    action, _states = model.predict(observation, deterministic=True, action_masks=action_masks)
+                    actions.append(action)
+                    observation, reward, done, info = env.step(action)
+                    reward_sum += reward
+                    counter += 1
+                    # print(action, observation, reward, done, info)
+                    if done[0]:
+                        break
+                rewards.append(reward_sum)
+            if all([r == 0 for r in rewards]):
+                self.should_end = True
+            print(all([r == 0 for r in rewards]))
+        else:
             _env = env.envs[0]
             observation = env.reset()
             reward_sum = 0
@@ -47,9 +70,11 @@ class BPCallbackMask(BaseCallback):
                 # print(action, observation, reward, done, info)
                 if done[0]:
                     break
-            #print("optimal reward: ", reward_sum)
+            # print("optimal reward: ", reward_sum)
             if reward_sum > threshold:
                 self.should_end = True
+
+
 
     def _on_training_start(self) -> None:
         """

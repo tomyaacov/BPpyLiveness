@@ -123,8 +123,18 @@ def prevent_third_x(xline, oline):
 
 @b_thread
 def player_x():  # simulate player X
+    # yield {request: x(0,1)}
+    # yield {request: x(1,2)}
+    # yield {request: x(0,2)}
+    # yield {request: x(0,0)}
     while True:
         yield {request: any_x}
+
+@b_thread
+def check():
+    yield {waitFor: static_event['XWin']}
+    assert False
+
 
 from bppy.analysis.dfs_bprogram_verifier import DFSBProgramVerifier
 
@@ -144,12 +154,13 @@ def bp_gen():
                  # [block_fork(xfork, forks20[1]) for xfork in forks20[0]] +
                  # [block_fork(xfork, forks00[1]) for xfork in forks00[0]] +
                  # [block_fork(xfork, forks_diag[1]) for xfork in forks_diag[0]] +
-                 [player_x()],
+                 [player_x()],# + [check()],
         event_selection_strategy=PriorityBasedEventSelectionStrategy(default_priority=0),
         listener=PrintBProgramRunnerListener()
     )
 
 if __name__ == "__main__":
+    bp_gen().run()
     ver = DFSBProgramVerifier(bp_gen, max_trace_length=1000)
     ok, counter_example = ver.verify()
 
