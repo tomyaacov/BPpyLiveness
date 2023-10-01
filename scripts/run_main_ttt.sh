@@ -6,8 +6,9 @@
 #SBATCH --output run_main_ttt.out ### output log for running job - %J is the job number variable
 #SBATCH --mail-user=tomya@post.bgu.ac.il ### users email for sending job status notifications ñ replace with yours
 #SBATCH --mail-type=FAIL ### conditions when to send the email. ALL,BEGIN,END,FAIL, REQUEU, NONE
-#SBATCH --mem=32G ### total amount of RAM // 500
-#SBATCH --ntasks=1
+#SBATCH --mem=64G ### total amount of RAM // 500
+#SBATCH --cpus-per-task=6	# 6 cpus per task – use for multithreading, usually with --tasks=1
+#SBATCH --ntasks=4
 #SBATCH --gpus=1
 
 ### Start you code below ####
