@@ -58,7 +58,7 @@ class BPCallbackMask(BaseCallback):
                     print(actions)
                 return reward_sum
             model.action_space.bprogram = None
-            with ThreadPoolExecutor(1000) as executor:
+            with ThreadPoolExecutor(100) as executor:
                 processes = [executor.submit(evaluate_single, model) for _ in range(self.repeat)]
                 rewards = [p.result() for p in processes]
             model.action_space.bprogram = get_bprogram()
