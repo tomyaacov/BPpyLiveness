@@ -26,4 +26,4 @@ done
 module load anaconda ### load anaconda module
 source activate bppy-py39 ### activating Conda environment. Environment must be configured before running the job
 cd ~/repos/BPpyLiveness/ || exit
-/usr/bin/time -a -o $out_file_name -f "time:%E,memory:%M" ~/.conda/envs/bppy-py39/bin/python main_dfs_single.py main_dfs_single.py --n $n --k $k --m $m > $out_file_name
+/usr/bin/time -a -o $out_file_name -f "time:%E,memory:%M" ~/.conda/envs/bppy-py39/bin/python main_dfs_single.py --n $n --k $k --m $m > $out_file_name
