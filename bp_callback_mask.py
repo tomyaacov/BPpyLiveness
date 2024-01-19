@@ -1,8 +1,8 @@
 from stable_baselines3.common.callbacks import BaseCallback
 from sb3_contrib import MaskablePPO
 from concurrent.futures import ThreadPoolExecutor
-from ttt_helper import get_env, get_bprogram
 import tempfile
+import time
 
 class BPCallbackMask(BaseCallback):
     """
@@ -31,6 +31,7 @@ class BPCallbackMask(BaseCallback):
         # self.parent = None  # type: Optional[BaseCallback]
         self.should_end = False
         self.repeat = repeat
+        self.start_time = time.time()
 
     def test(self, model, env, threshold=-0.5):
         if self.repeat > 1:
@@ -86,6 +87,7 @@ class BPCallbackMask(BaseCallback):
             # print("optimal reward: ", reward_sum)
             if reward_sum > threshold:
                 self.should_end = True
+                self.total_time = time.time() - self.start_time
 
 
 

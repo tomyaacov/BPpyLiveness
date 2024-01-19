@@ -9,39 +9,39 @@ params = {
     "m": None  #
 }
 
-
-def add_a():
+@bp.thread
+def req_6():
     for i in range(0, params["n"]):
-        yield bp.sync(request=bp.BEvent("H"), state=i, mustFinish=True)
+        yield bp.sync(request=bp.BEvent("F"), state=i, mustFinish=True)
     while True:
         yield bp.sync(state=params["n"], mustFinish=False)
 
-
-def add_b(name):
+@bp.thread
+def req_7(name):
     for i in range(0, params["n"]):
-        yield bp.sync(request=bp.BEvent("C" + name), state=i, mustFinish=False)
+        yield bp.sync(request=bp.BEvent("M" + name), state=i, mustFinish=False)
     while True:
         yield bp.sync(state=params["n"], mustFinish=False)
 
-
-def control():
+@bp.thread
+def req_8():
     while True:
         for i in range(0, params["k"]):
             e = yield bp.sync(waitFor=bp.All(), state=i, mustFinish=False)
-            if e.name == "C":
+            if e.name.startswith("M"):
                 break
-        if e.name == "H":
-            e = yield bp.sync(waitFor=bp.BEvent("C0"), block=bp.BEvent("H"), state=params["k"], mustFinish=False)
+        if e.name == "F":
+            e = yield bp.sync(waitFor=bp.EventSet(lambda e: e.name.startswith("M")), block=bp.BEvent("F"), state=params["k"], mustFinish=False)
 
 
 def init_bprogram():
-    return bp.BProgram(bthreads=[add_a()] + [add_b(str(x)) for x in range(params["m"])] + [control()],
+    return bp.BProgram(bthreads=[req_6()] + [req_7(str(x)) for x in range(params["m"])] + [req_8()],
                        event_selection_strategy=bp.SimpleEventSelectionStrategy(),
                        listener=bp.PrintBProgramRunnerListener())
 
 
 def get_event_list():
-    return [bp.BEvent("H")] + [bp.BEvent("C" + str(x)) for x in range(params["m"])]
+    return [bp.BEvent("F")] + [bp.BEvent("M" + str(x)) for x in range(params["m"])]
 
 
 if __name__ == '__main__':
@@ -49,3 +49,4 @@ if __name__ == '__main__':
     params["k"] = 1
     params["m"] = 3
     init_bprogram().run()
+

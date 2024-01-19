@@ -9,12 +9,13 @@ parser.add_argument("--m", default=1)
 
 args = parser.parse_args()
 
-from hot_cold import init_bprogram, params, get_event_list
+from level_crossing.level_crossing_param import init_bprogram, params, get_event_list
 
 params["n"] = int(args.n)
 params["k"] = int(args.k)
 params["m"] = int(args.m)
 name = "_".join([str(key) + "_" + str(value) for key, value in vars(args).items()])
+
 
 dfs = DFSBProgram(init_bprogram, get_event_list(), max_trace_length=10**10)
 init_s, visited = dfs.run()

@@ -12,10 +12,10 @@ import argparse
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--n", default=10)
+parser.add_argument("--n", default=3)
 parser.add_argument("--k", default=1)
 parser.add_argument("--m", default=1)
-parser.add_argument("--total_timesteps", default=100000)
+parser.add_argument("--total_timesteps", default=10000)
 parser.add_argument("--state_mode", default="a")
 parser.add_argument("--reward_mode", default="r")
 
@@ -24,10 +24,10 @@ args = parser.parse_args()
 
 def gym_env_generator(state_mode, reward_mode, n, m):
     mapper = {
-        0: "H"
+        0: "F"
     }
     for i in range(m):
-        mapper[i + 1] = "C" + str(i)
+        mapper[i + 1] = "M" + str(i)
     env = BPEnvMask()
     env.bprogram_generator = init_bprogram
     env.action_space = BPActionSpace(mapper)
@@ -44,7 +44,7 @@ def gym_env_generator(state_mode, reward_mode, n, m):
     env.observation_space = gym.spaces.Box(0, n, shape=(dim,))
     return env
 
-from hot_cold import init_bprogram, params
+from level_crossing.level_crossing_param import init_bprogram, params
 
 params["n"] = int(args.n)
 params["k"] = int(args.k)
@@ -55,6 +55,7 @@ log_dir = "output/" + name + "/"
 print(log_dir)
 
 steps = []
+times = []
 
 for i in range(10):
     env = gym_env_generator(args.state_mode, args.reward_mode, params["n"], params["m"])
@@ -63,12 +64,16 @@ for i in range(10):
     os.makedirs(log_dir, exist_ok=True)
     model = MaskablePPO("MlpPolicy", env, verbose=0)
 
+    callback_obj = BPCallbackMask()
     model.learn(total_timesteps=int(args.total_timesteps),
-                callback=BPCallbackMask())
+                callback=callback_obj)
     steps.append(model.num_timesteps)
+    times.append(callback_obj.total_time)
 
     model.action_space.bprogram = None
     model.save(log_dir + "model")
 
 print("steps: ", steps)
 print("average steps: ", sum(steps) / len(steps))
+print("times: ", times)
+print("average times: ", sum(times) / len(times))
