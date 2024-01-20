@@ -9,6 +9,7 @@ from bp_callback_mask import BPCallbackMask
 from bp_action_space import BPActionSpace
 import numpy as np
 import argparse
+import statistics
 
 parser = argparse.ArgumentParser()
 
@@ -75,5 +76,7 @@ for i in range(10):
 
 print("steps: ", steps)
 print("average steps: ", sum(steps) / len(steps))
+print("Median steps: ", statistics.median(steps))
 print("times: ", times)
 print("average times: ", sum(times) / len(times))
+print("Median times: ", statistics.median(times))
