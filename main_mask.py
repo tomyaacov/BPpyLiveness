@@ -58,7 +58,7 @@ print(log_dir)
 steps = []
 times = []
 
-for i in range(10):
+for i in range(20):
     env = gym_env_generator(args.state_mode, args.reward_mode, params["n"], params["m"])
 
     env = Monitor(env, log_dir)
