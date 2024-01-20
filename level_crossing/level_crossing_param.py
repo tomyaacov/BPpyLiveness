@@ -31,7 +31,7 @@ def req_8():
             if e.name.startswith("M"):
                 break
         if e.name == "F":
-            e = yield bp.sync(waitFor=bp.EventSet(lambda e: e.name.startswith("M")), block=bp.BEvent("F"), state=params["k"], mustFinish=False)
+            e = yield bp.sync(waitFor=bp.BEvent("M0"), block=bp.BEvent("F"), state=params["k"], mustFinish=False)
 
 
 def init_bprogram():
